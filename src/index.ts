@@ -29,7 +29,11 @@ class WebpackHotLockPlugin {
       const hostname = await WebpackDevServer.getHostname(devServer.options.host ?? 'local-ip')
       const address = devServer.server.address()!;
 
-      const baseUri = `//${hostname}:${(address as any).port}/`;
+      const isHTTPS = devServer.options.server === 'https'
+        || (typeof devServer.options.server === 'object' && devServer.options.server.type === 'https')
+        || !!devServer.options.https;
+
+      const baseUri = `${ isHTTPS ? 'https' : 'http' }://${hostname}:${(address as any).port}/`;
       const lockData = {
         pid: process.pid,
         baseUri,
