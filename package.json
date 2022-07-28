@@ -1,0 +1,34 @@
+{
+  "name": "webpack-hot-lock-plugin",
+  "version": "0.1.0",
+  "license": "MIT",
+  "homepage": "https://github.com/Tarik02/webpack-hot-lock-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/Tarik02/webpack-hot-lock-plugin/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tarik02/webpack-hot-lock-plugin.git"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepack": "yarn build"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4",
+    "webpack": "^5.74.0"
+  },
+  "peerDependencies": {
+    "webpack": "^5"
+  }
+}
