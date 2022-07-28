@@ -1,6 +1,6 @@
 {
   "name": "webpack-hot-lock-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "homepage": "https://github.com/Tarik02/webpack-hot-lock-plugin#readme",
   "bugs": {
@@ -17,7 +17,7 @@
     }
   },
   "files": [
-    "dist/*"
+    "dist/**/*"
   ],
   "scripts": {
     "build": "tsc",
