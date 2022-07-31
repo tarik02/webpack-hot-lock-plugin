@@ -1,5 +1,9 @@
 # webpack-hot-lock-plugin
 
+![Check](https://github.com/Tarik02/webpack-hot-lock-plugin/actions/workflows/check.yml/badge.svg)
+![Publish to NPM](https://github.com/Tarik02/webpack-hot-lock-plugin/actions/workflows/publish-to-npm.yml/badge.svg)
+[![npm version](https://badge.fury.io/js/webpack-hot-lock-plugin.svg)](https://badge.fury.io/js/webpack-hot-lock-plugin)
+
 ## Installation
 
 ```bash
