@@ -6,6 +6,7 @@ import { injectOnDevServerListening } from './quirks/injectOnDevServerListening.
 
 export type Options = {
   name?: string;
+  gitignore?: boolean;
   transform?: (data: Record<string, any>, context: {
     compiler: Webpack.Compiler,
     devServer: WebpackDevServer,
@@ -19,6 +20,8 @@ export default class WebpackHotLockPlugin {
   apply(compiler: Webpack.Compiler): void {
     const {
       name = 'hot.json',
+      gitignore = false,
+      transform,
     } = this.options;
 
     injectOnDevServerListening(compiler.options, async devServer => {
@@ -39,7 +42,7 @@ export default class WebpackHotLockPlugin {
         baseUri,
       };
 
-      this.options.transform?.(lockData, {
+      transform?.(lockData, {
         compiler,
         devServer,
       });
@@ -52,6 +55,10 @@ export default class WebpackHotLockPlugin {
           { recursive: true },
         );
         await FS.promises.writeFile(
+          Path.join(Path.dirname(hotFile), '.gitignore'),
+          `${Path.basename(hotFile)}\n.gitignore\n`
+        );
+        await FS.promises.writeFile(
           hotFile,
           JSON.stringify(lockData, undefined, 2),
         );
@@ -61,6 +68,14 @@ export default class WebpackHotLockPlugin {
         if (FS.statSync(hotFile, { throwIfNoEntry: false })) {
           FS.rmSync(
             hotFile,
+          );
+        }
+        if (
+          gitignore &&
+          FS.statSync(Path.join(Path.dirname(hotFile), '.gitignore'), { throwIfNoEntry: false })
+        ) {
+          FS.rmSync(
+            Path.join(Path.dirname(hotFile), '.gitignore'),
           );
         }
       };
