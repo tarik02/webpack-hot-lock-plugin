@@ -1,10 +1,10 @@
-import * as FS from 'fs';
-import * as Path from 'path';
-import * as Webpack from 'webpack';
-import * as WebpackDevServer from 'webpack-dev-server';
-import { injectOnDevServerListening } from './quirks/injectOnDevServerListening';
+import * as FS from 'node:fs';
+import * as Path from 'node:path';
+import Webpack from 'webpack';
+import WebpackDevServer from 'webpack-dev-server';
+import { injectOnDevServerListening } from './quirks/injectOnDevServerListening.js';
 
-type Options = {
+export type Options = {
   name?: string;
   transform?: (data: Record<string, any>, context: {
     compiler: Webpack.Compiler,
@@ -12,7 +12,7 @@ type Options = {
   }) => void;
 };
 
-class WebpackHotLockPlugin {
+export default class WebpackHotLockPlugin {
   constructor(private options: Options = {}) {
   }
 
@@ -81,5 +81,3 @@ class WebpackHotLockPlugin {
     });
   }
 }
-
-export = WebpackHotLockPlugin;

@@ -10,6 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/Tarik02/webpack-hot-lock-plugin.git"
   },
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -30,6 +31,6 @@
     "webpack-dev-server": "^4.9.3"
   },
   "peerDependencies": {
-    "webpack": "^5"
+    "webpack": ">=5"
   }
 }
