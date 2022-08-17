@@ -3041,6 +3041,7 @@ __metadata:
     webpack-dev-server: ^4.9.3
   peerDependencies:
     webpack: ">=5"
+    webpack-dev-server: "*"
   languageName: unknown
   linkType: soft
 
