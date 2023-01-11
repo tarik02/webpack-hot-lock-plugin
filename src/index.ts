@@ -1,5 +1,6 @@
 import * as FS from 'node:fs';
 import * as Path from 'node:path';
+import * as HTTP from 'node:http';
 import Webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import { injectOnDevServerListening } from './quirks/injectOnDevServerListening.js';
@@ -7,6 +8,7 @@ import { injectOnDevServerListening } from './quirks/injectOnDevServerListening.
 export type Options = {
   name?: string;
   gitignore?: boolean;
+  socket?: boolean | string;
   transform?: (data: Record<string, any>, context: {
     compiler: Webpack.Compiler,
     devServer: WebpackDevServer,
@@ -21,6 +23,7 @@ export default class WebpackHotLockPlugin {
     const {
       name = 'hot.json',
       gitignore = false,
+      socket = true,
       transform,
     } = this.options;
 
@@ -28,6 +31,34 @@ export default class WebpackHotLockPlugin {
       if (!devServer.server) {
         return;
       }
+
+      const hotFile = Path.resolve(compiler.outputPath, name);
+
+      const socketData = await (async () => {
+        if (socket === false) {
+          return null;
+        }
+
+        const path = socket === true ?
+          Path.resolve(Path.dirname(hotFile), `${ Path.basename(hotFile, Path.extname(hotFile)) }.sock`) :
+          Path.resolve(compiler.outputPath, hotFile);
+
+        try {
+          await FS.promises.rm(path);
+        } catch (e: any) {
+          if (e.code !== 'ENOENT') {
+            throw e;
+          }
+        }
+
+        const server = HTTP.createServer(devServer.app);
+
+        new Promise<void>(resolve => {
+          server.listen(path, resolve);
+        });
+
+        return { path, server };
+      })();
 
       const hostname = await WebpackDevServer.getHostname(devServer.options.host ?? 'local-ip')
       const address = devServer.server.address()!;
@@ -40,14 +71,15 @@ export default class WebpackHotLockPlugin {
       const lockData = {
         pid: process.pid,
         baseUri,
+        socket: socketData
+          ? Path.relative(Path.dirname(hotFile), socketData.path)
+          : undefined,
       };
 
       transform?.(lockData, {
         compiler,
         devServer,
       });
-
-      const hotFile = Path.resolve(compiler.outputPath, name);
 
       const createLockfile = async () => {
         await FS.promises.mkdir(
@@ -56,7 +88,14 @@ export default class WebpackHotLockPlugin {
         );
         await FS.promises.writeFile(
           Path.join(Path.dirname(hotFile), '.gitignore'),
-          `${Path.basename(hotFile)}\n.gitignore\n`
+          [
+            Path.basename(hotFile),
+            ...socketData
+              ? Path.basename(socketData.path)
+              : [],
+            '.gitignore',
+            '',
+          ].join('\n')
         );
         await FS.promises.writeFile(
           hotFile,
@@ -70,6 +109,7 @@ export default class WebpackHotLockPlugin {
             hotFile,
           );
         }
+
         if (
           gitignore &&
           FS.statSync(Path.join(Path.dirname(hotFile), '.gitignore'), { throwIfNoEntry: false })
@@ -77,6 +117,11 @@ export default class WebpackHotLockPlugin {
           FS.rmSync(
             Path.join(Path.dirname(hotFile), '.gitignore'),
           );
+        }
+
+        if (socketData && FS.statSync(socketData.path, { throwIfNoEntry: false })) {
+          FS.rmSync(socketData.path);
+          socketData.server.close();
         }
       };
 
