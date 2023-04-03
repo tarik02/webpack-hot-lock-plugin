@@ -91,7 +91,7 @@ export default class WebpackHotLockPlugin {
           [
             Path.basename(hotFile),
             ...socketData
-              ? Path.basename(socketData.path)
+              ? [Path.basename(socketData.path)]
               : [],
             '.gitignore',
             '',
